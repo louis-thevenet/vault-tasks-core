@@ -16,7 +16,7 @@ insta = {version = "1.40.0", features = ["yaml"]}
 name = "vault-tasks-core"
 description = "Vault Tasks Core"
 categories = ["parsing"]
-version = "0.4.0"
+version = "0.1.0"
 edition = "2021"
 repository = "https://github.com/louis-thevenet/vault-tasks-core"
 authors = ["Louis Thevenet <louis.tvnt@gmail.com>"]
