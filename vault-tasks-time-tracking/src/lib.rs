@@ -1,9 +1,9 @@
 use std::time::Duration;
 
 use time_tracking_technique::TimeTrackingTechnique;
-mod flow_time;
-mod pomodoro;
-mod time_tracking_technique;
+pub mod flow_time;
+pub mod pomodoro;
+pub mod time_tracking_technique;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum State {
@@ -49,3 +49,87 @@ impl<T: TimeTrackingTechnique> TimeTrackingEngine<T> {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use color_eyre::eyre::Result;
+
+    use crate::{flow_time::FlowTime, pomodoro::Pomodoro, State, TimeTrackingEngine};
+
+    use std::time::Duration;
+
+    #[test]
+    fn test_run_pomodoro() {
+        let time_tracker = TimeTrackingEngine::new(Pomodoro::classic_pomodoro());
+        let focus_time = Duration::from_secs(60 * 25);
+        let short_break_time = Duration::from_secs(60 * 5);
+        assert_eq!(time_tracker.mode, Pomodoro::classic_pomodoro());
+        assert!(time_tracker.state.is_none());
+
+        let (to_spend_opt, time_tracker) = time_tracker.switch(Duration::default());
+        assert!(time_tracker.state.is_some());
+        assert_eq!(
+            time_tracker.state.clone().unwrap(),
+            State::Focus(Some(focus_time))
+        );
+        assert!(to_spend_opt.is_some());
+        assert_eq!(focus_time, to_spend_opt.unwrap());
+
+        let (to_spend_opt, time_tracker) = time_tracker.switch(Duration::default());
+        assert!(time_tracker.state.is_some());
+        assert_eq!(
+            time_tracker.state.clone().unwrap(),
+            State::Break(Some(short_break_time))
+        );
+        assert!(to_spend_opt.is_some());
+        assert_eq!(short_break_time, to_spend_opt.unwrap());
+    }
+    #[test]
+    fn test_full_run_pomodoro() {
+        let mut time_tracker = TimeTrackingEngine::new(Pomodoro::classic_pomodoro());
+        assert_eq!(time_tracker.mode, Pomodoro::classic_pomodoro());
+        assert!(time_tracker.state.is_none());
+
+        let mut to_spend_opt = None;
+
+        for _i in 0..2 {
+            // (Focus -> Break) 3 times
+            for _j in 0..(3 * 2) {
+                let (to_spend_opt2, time_tracker2) = time_tracker.switch(Duration::from_secs(0));
+                time_tracker = time_tracker2;
+                to_spend_opt = to_spend_opt2;
+            }
+
+            assert!(time_tracker.state.is_some());
+            assert_eq!(
+                time_tracker.state.clone().unwrap(),
+                State::Break(to_spend_opt)
+            );
+        }
+    }
+    #[test]
+    fn test_run_flowtime() -> Result<()> {
+        let break_factor = 5;
+        let time_tracker = TimeTrackingEngine::new(FlowTime::new(break_factor)?);
+
+        assert!(time_tracker.state.is_none());
+
+        let focus_time = Duration::from_secs(25);
+        let break_time = focus_time / break_factor;
+
+        let (to_spend_opt, time_tracker) = time_tracker.switch(Duration::from_secs(0));
+
+        assert!(time_tracker.state.is_some());
+        assert_eq!(time_tracker.state.clone().unwrap(), State::Focus(None));
+        assert!(to_spend_opt.is_none());
+
+        let (to_spend_opt, time_tracker) = time_tracker.switch(focus_time);
+        assert!(time_tracker.state.is_some());
+        assert_eq!(
+            time_tracker.state.clone().unwrap(),
+            State::Break(Some(break_time))
+        );
+        assert!(to_spend_opt.is_some());
+        assert_eq!(break_time, to_spend_opt.unwrap());
+        Ok(())
+    }
+}
