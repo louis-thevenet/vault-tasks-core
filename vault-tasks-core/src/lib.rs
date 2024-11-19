@@ -305,6 +305,7 @@ impl TaskManager {
 
     /// Whether the path resolves to something that can be entered or not.
     /// Directories, Headers and Tasks with subtasks can be entered.
+    #[must_use]
     pub fn can_enter(&self, selected_header_path: &[String]) -> bool {
         fn aux(file_entry: VaultData, selected_header_path: &[String], path_index: usize) -> bool {
             if path_index == selected_header_path.len() {

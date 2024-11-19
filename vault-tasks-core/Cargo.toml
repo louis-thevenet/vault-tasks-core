@@ -1,0 +1,23 @@
+[dependencies]
+chrono = "0.4.38"
+lexical-sort = "0.3.1"
+strum_macros = "0.26.4"
+winnow = "0.6.20"
+color-eyre = "0.6.3"
+serde = {version = "1.0.215", features = ["derive"]}
+tracing = "0.1.40"
+pretty_assertions = "1.4.1"
+strum = {version = "0.26.3", features = ["derive"]}
+
+[dev-dependencies]
+insta = {version = "1.41.1", features = ["yaml"]}
+
+[package]
+name = "vault-tasks-core"
+description = "Vault Tasks Core"
+categories = ["parsing"]
+version = "0.5.0"
+edition.workspace=true
+repository.workspace=true
+authors.workspace=true
+license.workspace=true

@@ -52,6 +52,7 @@ impl Display for DueDate {
 }
 
 impl DueDate {
+    #[must_use]
     pub fn to_display_format(&self, not_american_format: bool) -> String {
         if matches!(self, Self::NoDate) {
             String::new()
@@ -62,6 +63,7 @@ impl DueDate {
             )
         }
     }
+    #[must_use]
     pub fn to_string_format(&self, not_american_format: bool) -> String {
         let format_date = if not_american_format {
             "%d/%m/%Y"
@@ -81,6 +83,7 @@ impl DueDate {
         }
     }
 
+    #[must_use]
     pub fn get_relative_str(&self) -> Option<String> {
         let now = chrono::Local::now();
         let time_delta = match self {

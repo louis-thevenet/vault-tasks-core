@@ -39,6 +39,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "70033777eb8b5124a81a1889416543dddef2de240019b674c81285a2635a7e1e"
 
 [[package]]
+name = "anyhow"
+version = "1.0.93"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4c95c10ba0b00a02636238b814946408b1322d5ac4760326e6fb8ec956d85775"
+
+[[package]]
 name = "autocfg"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -499,7 +505,7 @@ checksum = "830b7e5d4d90034032940e4ace0d9a9a057e7a45cd94e6c007832e39edb82f6d"
 
 [[package]]
 name = "vault-tasks-core"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "chrono",
  "color-eyre",
@@ -511,6 +517,14 @@ dependencies = [
  "strum_macros",
  "tracing",
  "winnow",
+]
+
+[[package]]
+name = "vault-tasks-time-tracking"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "color-eyre",
 ]
 
 [[package]]

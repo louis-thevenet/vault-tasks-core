@@ -13,6 +13,7 @@ pub struct Filter {
 }
 
 /// Parses a [`Task`] from an input `&str`. Returns the `Task` and whether the input specify a task state (- [X] or - [ ]) or not.
+#[must_use]
 pub fn parse_search_input(input: &str, config: &TasksConfig) -> Filter {
     // Are searching for a specific state ?
     let has_state = input.starts_with("- [");
@@ -95,6 +96,7 @@ fn filter_task(task: &Task, filter: &Filter) -> bool {
 
     state_match && name_match && today_flag_match && date_match && tags_match && priority_match
 }
+#[must_use]
 pub fn filter_to_vec(vault_data: &VaultData, filter: &Filter) -> Vec<Task> {
     fn aux(vault_data: &VaultData, task_filter: &Filter, res: &mut Vec<Task>) {
         match vault_data {
@@ -118,6 +120,7 @@ pub fn filter_to_vec(vault_data: &VaultData, filter: &Filter) -> Vec<Task> {
     aux(vault_data, filter, res);
     res.clone()
 }
+#[must_use]
 pub fn filter(vault_data: &VaultData, task_filter: &Filter) -> Option<VaultData> {
     match vault_data {
         VaultData::Header(level, name, children) => {

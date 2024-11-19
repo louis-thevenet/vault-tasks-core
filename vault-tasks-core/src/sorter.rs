@@ -17,13 +17,14 @@ pub enum SortingMode {
 }
 
 impl SortingMode {
+    #[must_use]
     pub fn next(self) -> Self {
         match self {
-            SortingMode::ByDueDate => SortingMode::ByName,
-            SortingMode::ByName => SortingMode::ByDueDate,
+            Self::ByDueDate => Self::ByName,
+            Self::ByName => Self::ByDueDate,
         }
     }
-    pub fn sort(tasks: &mut [Task], sorter: SortingMode) {
+    pub fn sort(tasks: &mut [Task], sorter: Self) {
         tasks.sort_by(|t1, t2| Self::cmp(t1, t2, sorter));
     }
 
@@ -46,10 +47,10 @@ impl SortingMode {
     /// - The other sorting mode
     /// - Priority: usual number ordering
     /// - Tags: not used
-    fn cmp(t1: &Task, t2: &Task, sorter: SortingMode) -> Ordering {
+    fn cmp(t1: &Task, t2: &Task, sorter: Self) -> Ordering {
         let res_initial_sort = match sorter {
-            SortingMode::ByDueDate => Self::cmp_due_date(t1, t2),
-            SortingMode::ByName => lexical_cmp(&t1.name, &t2.name),
+            Self::ByDueDate => Self::cmp_due_date(t1, t2),
+            Self::ByName => lexical_cmp(&t1.name, &t2.name),
         };
 
         if !matches!(res_initial_sort, Ordering::Equal) {
@@ -64,8 +65,8 @@ impl SortingMode {
 
         // We do the other sorting methods
         let res = match sorter {
-            SortingMode::ByDueDate => lexical_cmp(&t1.name, &t2.name),
-            SortingMode::ByName => Self::cmp_due_date(t1, t2),
+            Self::ByDueDate => lexical_cmp(&t1.name, &t2.name),
+            Self::ByName => Self::cmp_due_date(t1, t2),
         };
         if !matches!(res, Ordering::Equal) {
             return res;
