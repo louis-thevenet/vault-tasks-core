@@ -1,0 +1,11 @@
+[package]
+name = "vault-tasks-time-tracking"
+version = "0.1.0"
+edition.workspace = true
+repository.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow = "1.0.93"
+color-eyre = "0.6.3"
