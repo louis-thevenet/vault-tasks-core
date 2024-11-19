@@ -1,10 +1,11 @@
 [package]
-name = "vault-tasks-time-tracking"
+name = "vault-tasks-time-management"
 version = "0.1.0"
 edition.workspace = true
 repository.workspace = true
 authors.workspace = true
 license.workspace = true
+description = "Pomodoro & FlowTime time managment techniques"
 
 [dependencies]
 anyhow = "1.0.93"

@@ -1,7 +1,8 @@
 use std::time::Duration;
 
-use crate::{time_tracking_technique::TimeTrackingTechnique, State};
 use color_eyre::{eyre::bail, Result};
+
+use crate::{time_management_technique::TimeManagementTechnique, State};
 
 pub struct FlowTime {
     break_factor: u32,
@@ -16,7 +17,7 @@ impl FlowTime {
     }
 }
 
-impl TimeTrackingTechnique for FlowTime {
+impl TimeManagementTechnique for FlowTime {
     fn switch(self, state: Option<State>, time_spent: Duration) -> (State, Self) {
         match state {
             Some(State::Focus(_)) => ((State::Break(Some(time_spent / self.break_factor))), self),

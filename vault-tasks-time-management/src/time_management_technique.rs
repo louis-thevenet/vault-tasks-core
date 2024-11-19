@@ -2,6 +2,6 @@ use std::time::Duration;
 
 use crate::State;
 
-pub trait TimeTrackingTechnique {
+pub trait TimeManagementTechnique {
     fn switch(self, state: Option<State>, time_spent: Duration) -> (State, Self);
 }

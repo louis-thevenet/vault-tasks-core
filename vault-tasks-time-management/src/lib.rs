@@ -1,9 +1,10 @@
 use std::time::Duration;
 
-use time_tracking_technique::TimeTrackingTechnique;
+use time_management_technique::TimeManagementTechnique;
+
 pub mod flow_time;
 pub mod pomodoro;
-pub mod time_tracking_technique;
+pub mod time_management_technique;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum State {
@@ -12,12 +13,12 @@ pub enum State {
 }
 #[derive(Debug)]
 /// Provides tracking methods using a generic `TimeTrackingTechnique`
-pub struct TimeTrackingEngine<T: TimeTrackingTechnique> {
+pub struct TimeManagementEngine<T: TimeManagementTechnique> {
     pub mode: T,
     pub state: Option<State>,
 }
 
-impl<T: TimeTrackingTechnique> TimeTrackingEngine<T> {
+impl<T: TimeManagementTechnique> TimeManagementEngine<T> {
     /// Creates a new [`TimeTrackingEngine<T>`].
     pub fn new(technique: T) -> Self {
         Self {
@@ -31,7 +32,7 @@ impl<T: TimeTrackingTechnique> TimeTrackingEngine<T> {
     /// - `time_spent: Duration`: The duration of the previous session.
     /// # Returns
     /// - `Option<Duration>`: Whether there is or not an explicit duration for the next session
-    /// - `TimeTrackingEngine<T>`: The next state of the engine
+    /// - `TimeManagementEngine<T>`: The next state of the engine
     pub fn switch(self, time_spent: Duration) -> (Option<Duration>, Self) {
         let (new_state, new_mode) = self.mode.switch(self.state, time_spent);
 
@@ -53,13 +54,13 @@ impl<T: TimeTrackingTechnique> TimeTrackingEngine<T> {
 mod tests {
     use color_eyre::eyre::Result;
 
-    use crate::{flow_time::FlowTime, pomodoro::Pomodoro, State, TimeTrackingEngine};
+    use crate::{flow_time::FlowTime, pomodoro::Pomodoro, State, TimeManagementEngine};
 
     use std::time::Duration;
 
     #[test]
     fn test_run_pomodoro() {
-        let time_tracker = TimeTrackingEngine::new(Pomodoro::classic_pomodoro());
+        let time_tracker = TimeManagementEngine::new(Pomodoro::classic_pomodoro());
         let focus_time = Duration::from_secs(60 * 25);
         let short_break_time = Duration::from_secs(60 * 5);
         assert_eq!(time_tracker.mode, Pomodoro::classic_pomodoro());
@@ -85,7 +86,7 @@ mod tests {
     }
     #[test]
     fn test_full_run_pomodoro() {
-        let mut time_tracker = TimeTrackingEngine::new(Pomodoro::classic_pomodoro());
+        let mut time_tracker = TimeManagementEngine::new(Pomodoro::classic_pomodoro());
         assert_eq!(time_tracker.mode, Pomodoro::classic_pomodoro());
         assert!(time_tracker.state.is_none());
 
@@ -109,7 +110,7 @@ mod tests {
     #[test]
     fn test_run_flowtime() -> Result<()> {
         let break_factor = 5;
-        let time_tracker = TimeTrackingEngine::new(FlowTime::new(break_factor)?);
+        let time_tracker = TimeManagementEngine::new(FlowTime::new(break_factor)?);
 
         assert!(time_tracker.state.is_none());
 

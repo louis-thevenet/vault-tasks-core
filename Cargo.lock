@@ -520,7 +520,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "vault-tasks-time-tracking"
+name = "vault-tasks-time-management"
 version = "0.1.0"
 dependencies = [
  "anyhow",

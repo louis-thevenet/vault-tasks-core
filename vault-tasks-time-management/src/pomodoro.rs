@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use crate::{time_tracking_technique::TimeTrackingTechnique, State};
+use crate::{time_management_technique::TimeManagementTechnique, State};
 
 #[derive(Debug, PartialEq, Eq, PartialOrd)]
 pub struct Pomodoro {
@@ -21,7 +21,7 @@ impl Pomodoro {
         }
     }
 }
-impl TimeTrackingTechnique for Pomodoro {
+impl TimeManagementTechnique for Pomodoro {
     fn switch(self, state: Option<State>, _time_spent: Duration) -> (State, Self) {
         match state {
             Some(State::Focus(_)) => {
