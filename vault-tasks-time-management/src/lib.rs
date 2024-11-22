@@ -41,14 +41,10 @@ impl TimeManagementEngine {
     /// # Returns
     /// - `Option<Duration>`: Whether there is or not an explicit duration for the next session
     /// - `TimeManagementEngine<T>`: The next state of the engine
-    pub fn switch(&mut self, time_spent: Duration) -> Option<Duration> {
+    pub fn switch(&mut self, time_spent: Duration) -> State {
         let new_state = self.mode.switch(&self.state, time_spent);
-
-        let duration = match new_state {
-            State::Focus(d) | State::Break(d) => d,
-        };
-        self.state = Some(new_state);
-        duration
+        self.state = Some(new_state.clone());
+        new_state
     }
 }
 
@@ -73,8 +69,7 @@ mod tests {
             time_tracker.state.clone().unwrap(),
             State::Focus(Some(focus_time))
         );
-        assert!(to_spend_opt.is_some());
-        assert_eq!(focus_time, to_spend_opt.unwrap());
+        assert_eq!(State::Focus(Some(focus_time)), to_spend_opt);
 
         let to_spend_opt = time_tracker.switch(Duration::default());
         assert!(time_tracker.state.is_some());
@@ -82,15 +77,14 @@ mod tests {
             time_tracker.state.clone().unwrap(),
             State::Break(Some(short_break_time))
         );
-        assert!(to_spend_opt.is_some());
-        assert_eq!(short_break_time, to_spend_opt.unwrap());
+        assert_eq!(State::Break(Some(short_break_time)), to_spend_opt);
     }
     #[test]
     fn test_full_run_pomodoro() {
         let mut time_tracker = TimeManagementEngine::new(Box::new(Pomodoro::classic_pomodoro()));
         assert!(time_tracker.state.is_none());
 
-        let mut to_spend_opt = None;
+        let mut to_spend_opt = State::Focus(None);
 
         for _i in 0..2 {
             // (Focus -> Break) 3 times
@@ -100,10 +94,7 @@ mod tests {
             }
 
             assert!(time_tracker.state.is_some());
-            assert_eq!(
-                time_tracker.state.clone().unwrap(),
-                State::Break(to_spend_opt)
-            );
+            assert_eq!(time_tracker.state.clone().unwrap(), to_spend_opt);
         }
     }
     #[test]
@@ -118,9 +109,9 @@ mod tests {
 
         let to_spend_opt = time_tracker.switch(Duration::from_secs(0));
 
+        assert_eq!(State::Focus(None), to_spend_opt);
         assert!(time_tracker.state.is_some());
         assert_eq!(time_tracker.state.clone().unwrap(), State::Focus(None));
-        assert!(to_spend_opt.is_none());
 
         let to_spend_opt = time_tracker.switch(focus_time);
         assert!(time_tracker.state.is_some());
@@ -128,8 +119,7 @@ mod tests {
             time_tracker.state.clone().unwrap(),
             State::Break(Some(break_time))
         );
-        assert!(to_spend_opt.is_some());
-        assert_eq!(break_time, to_spend_opt.unwrap());
+        assert_eq!(State::Break(Some(break_time)), to_spend_opt);
         Ok(())
     }
 }
