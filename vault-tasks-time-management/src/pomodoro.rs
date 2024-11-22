@@ -22,29 +22,19 @@ impl Pomodoro {
     }
 }
 impl TimeManagementTechnique for Pomodoro {
-    fn switch(self, state: Option<State>, _time_spent: Duration) -> (State, Self) {
+    fn switch(&mut self, state: &Option<State>, _time_spent: Duration) -> State {
         match state {
             Some(State::Focus(_)) => {
                 if self.short_breaks_before_long == self.break_count {
-                    (
-                        State::Break(Some(self.long_break_duration)),
-                        Self {
-                            break_count: 0,
-                            ..self
-                        },
-                    )
+                    self.break_count = 0;
+                    State::Break(Some(self.long_break_duration))
                 } else {
-                    (
-                        State::Break(Some(self.short_break_duration)),
-                        Self {
-                            break_count: self.break_count + 1,
-                            ..self
-                        },
-                    )
+                    self.break_count += 1;
+                    State::Break(Some(self.short_break_duration))
                 }
             }
 
-            Some(State::Break(_)) | None => (State::Focus(Some(self.focus_duration)), self),
+            Some(State::Break(_)) | None => State::Focus(Some(self.focus_duration)),
         }
     }
 }
