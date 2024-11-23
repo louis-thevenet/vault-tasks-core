@@ -11,6 +11,21 @@ pub struct Pomodoro {
     long_break_duration: Duration,
 }
 impl Pomodoro {
+    pub fn new(
+        focus_duration: Duration,
+        short_breaks_before_long: usize,
+        short_break_duration: Duration,
+        long_break_duration: Duration,
+    ) -> Self {
+        Self {
+            focus_duration,
+            break_count: 0,
+            short_breaks_before_long,
+            short_break_duration,
+            long_break_duration,
+        }
+    }
+
     pub fn classic_pomodoro() -> Self {
         Self {
             focus_duration: Duration::from_secs(25 * 60),
