@@ -96,28 +96,48 @@ fn filter_task(task: &Task, filter: &Filter) -> bool {
 
     state_match && name_match && today_flag_match && date_match && tags_match && priority_match
 }
-#[must_use]
-pub fn filter_to_vec(vault_data: &VaultData, filter: &Filter) -> Vec<Task> {
-    fn aux(vault_data: &VaultData, task_filter: &Filter, res: &mut Vec<Task>) {
-        match vault_data {
-            VaultData::Directory(_, children) | VaultData::Header(_, _, children) => {
-                for c in children {
-                    aux(&c.clone(), task_filter, res);
-                }
-            }
-            VaultData::Task(task) => {
-                task.subtasks
-                    .iter()
-                    .for_each(|t| aux(&VaultData::Task(t.clone()), task_filter, res));
 
-                if filter_task(task, task_filter) {
-                    res.push(task.clone());
-                }
+fn filter_to_vec_layer(
+    vault_data: &VaultData,
+    task_filter: &Filter,
+    explore_children: bool,
+    res: &mut Vec<Task>,
+) {
+    match vault_data {
+        VaultData::Directory(_, children) | VaultData::Header(_, _, children) => {
+            for c in children {
+                filter_to_vec_layer(&c.clone(), task_filter, explore_children, res);
+            }
+        }
+        VaultData::Task(task) => {
+            if explore_children {
+                task.subtasks.iter().for_each(|t| {
+                    filter_to_vec_layer(
+                        &VaultData::Task(t.clone()),
+                        task_filter,
+                        explore_children,
+                        res,
+                    );
+                });
+            }
+
+            if filter_task(task, task_filter) {
+                res.push(task.clone());
             }
         }
     }
+}
+
+/// Will return a `Vec<Task>` matching the given `Filter` from the `VaultData`
+pub fn filter_to_vec(vault_data: &VaultData, filter: &Filter) -> Vec<Task> {
     let res = &mut vec![];
-    aux(vault_data, filter, res);
+    filter_to_vec_layer(vault_data, filter, true, res);
+    res.clone()
+}
+/// Will return a `Vec<Task>` matching the given `Filter` from the `VaultData`. This method will not explore children, meaning tasks will still contain their subtasks but these will not be explored. Useful to display tasks with subtasks and not have duplicates.
+pub fn filter_to_vec_first_level(vault_data: &VaultData, filter: &Filter) -> Vec<Task> {
+    let res = &mut vec![];
+    filter_to_vec_layer(vault_data, filter, false, res);
     res.clone()
 }
 #[must_use]

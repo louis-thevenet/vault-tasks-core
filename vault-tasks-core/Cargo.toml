@@ -16,7 +16,7 @@ insta = {version = "1.41.1", features = ["yaml"]}
 name = "vault-tasks-core"
 description = "Vault Tasks Core"
 categories = ["parsing"]
-version = "0.5.0"
+version = "0.6.0"
 edition.workspace=true
 repository.workspace=true
 authors.workspace=true
