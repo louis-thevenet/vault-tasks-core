@@ -122,4 +122,58 @@ mod tests {
         assert_eq!(State::Break(Some(break_time)), to_spend_opt);
         Ok(())
     }
+    #[test]
+    fn test_run_flowtime_excess_break_time() -> Result<()> {
+        let break_factor = 5;
+        let mut time_tracker = TimeManagementEngine::new(Box::new(FlowTime::new(break_factor)?));
+
+        assert!(time_tracker.state.is_none());
+
+        let focus_time = Duration::from_secs(25);
+        let break_time = focus_time / break_factor;
+
+        let to_spend_opt = time_tracker.switch(Duration::from_secs(0));
+
+        assert_eq!(State::Focus(None), to_spend_opt);
+        assert!(time_tracker.state.is_some());
+        assert_eq!(time_tracker.state.clone().unwrap(), State::Focus(None));
+
+        let to_spend_opt = time_tracker.switch(focus_time);
+        assert!(time_tracker.state.is_some());
+        assert_eq!(
+            time_tracker.state.clone().unwrap(),
+            State::Break(Some(break_time))
+        );
+        assert_eq!(State::Break(Some(break_time)), to_spend_opt);
+
+        // Break time lasted 2s instead of 5s
+        let break_time_skipped = Duration::from_secs(3);
+        time_tracker.switch(break_time - break_time_skipped);
+        let to_spend_opt = time_tracker.switch(focus_time);
+        assert!(time_tracker.state.is_some());
+        assert_eq!(
+            time_tracker.state.clone().unwrap(),
+            State::Break(Some(break_time + break_time_skipped))
+        );
+        assert_eq!(
+            State::Break(Some(break_time + break_time_skipped)),
+            to_spend_opt
+        );
+
+        // Ensures we return to normal cycle
+        let to_spend_opt = time_tracker.switch(break_time + break_time_skipped);
+        assert_eq!(State::Focus(None), to_spend_opt);
+        assert!(time_tracker.state.is_some());
+        assert_eq!(time_tracker.state.clone().unwrap(), State::Focus(None));
+
+        // Break time is normal
+        let to_spend_opt = time_tracker.switch(focus_time);
+        assert!(time_tracker.state.is_some());
+        assert_eq!(
+            time_tracker.state.clone().unwrap(),
+            State::Break(Some(break_time))
+        );
+        assert_eq!(State::Break(Some(break_time)), to_spend_opt);
+        Ok(())
+    }
 }
