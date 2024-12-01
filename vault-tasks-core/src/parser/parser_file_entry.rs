@@ -30,7 +30,7 @@ pub struct ParserFileEntry<'a> {
     pub filename: String,
 }
 
-impl<'i> ParserFileEntry<'i> {
+impl ParserFileEntry<'_> {
     fn parse_indent(input: &mut &str) -> PResult<usize> {
         let indent_length: String = repeat(1.., " ").parse_next(input)?;
         Ok(indent_length.len())
