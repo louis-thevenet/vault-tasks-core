@@ -176,4 +176,83 @@ mod tests {
         assert_eq!(State::Break(Some(break_time)), to_spend_opt);
         Ok(())
     }
+    #[test]
+    fn test_run_pomodoro_excess_break_time() {
+        let mut time_tracker = TimeManagementEngine::new(Box::new(Pomodoro::classic_pomodoro()));
+
+        assert!(time_tracker.state.is_none());
+
+        let focus_time = Duration::from_secs(1500);
+        let break_time = Duration::from_secs(1500 / 5);
+
+        // Init -> Focus
+        let to_spend_opt = time_tracker.switch(Duration::from_secs(0));
+
+        assert_eq!(State::Focus(Some(focus_time)), to_spend_opt);
+        assert!(time_tracker.state.is_some());
+        assert_eq!(
+            time_tracker.state.clone().unwrap(),
+            State::Focus(Some(focus_time))
+        );
+
+        // Focus -> Break
+        let to_spend_opt = time_tracker.switch(focus_time);
+        assert!(time_tracker.state.is_some());
+        assert_eq!(
+            time_tracker.state.clone().unwrap(),
+            State::Break(Some(break_time))
+        );
+        assert_eq!(State::Break(Some(break_time)), to_spend_opt);
+
+        // Break skipped early -> Focus
+        let break_time_skipped = Duration::from_secs(3);
+        time_tracker.switch(break_time - break_time_skipped);
+
+        // Focus skipped early -> Break
+        let focus_time_skipped = Duration::from_secs(9);
+        let to_spend_opt = time_tracker.switch(focus_time - focus_time_skipped);
+
+        // Is break time extended ?
+        assert!(time_tracker.state.is_some());
+        assert_eq!(
+            time_tracker.state.clone().unwrap(),
+            State::Break(Some(break_time + break_time_skipped))
+        );
+        assert_eq!(
+            State::Break(Some(break_time + break_time_skipped)),
+            to_spend_opt
+        );
+
+        // Break -> Focus
+        let to_spend_opt = time_tracker.switch(break_time + break_time_skipped);
+
+        // Is focus time extended ?
+        assert_eq!(
+            State::Focus(Some(focus_time + focus_time_skipped)),
+            to_spend_opt
+        );
+        assert!(time_tracker.state.is_some());
+        assert_eq!(
+            time_tracker.state.clone().unwrap(),
+            State::Focus(Some(focus_time + focus_time_skipped))
+        );
+
+        // Break time is normal
+        let to_spend_opt = time_tracker.switch(focus_time + focus_time_skipped);
+        assert!(time_tracker.state.is_some());
+        assert_eq!(
+            time_tracker.state.clone().unwrap(),
+            State::Break(Some(break_time))
+        );
+        assert_eq!(State::Break(Some(break_time)), to_spend_opt);
+
+        // Focus time is normal
+        let to_spend_opt = time_tracker.switch(break_time);
+        assert!(time_tracker.state.is_some());
+        assert_eq!(
+            time_tracker.state.clone().unwrap(),
+            State::Focus(Some(focus_time))
+        );
+        assert_eq!(State::Focus(Some(focus_time)), to_spend_opt);
+    }
 }
