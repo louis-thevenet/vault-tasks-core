@@ -69,7 +69,7 @@ impl TimeManagementTechnique for Pomodoro {
                 let delta = time_to_spend.as_secs_f32() - time_spent.as_secs_f32();
                 self.break_time_excess = 0_f32.max(delta);
                 State::Focus(Some(
-                    self.focus_duration + Duration::from_secs_f32(self.break_time_excess),
+                    self.focus_duration + Duration::from_secs_f32(self.focus_time_excess),
                 ))
             }
             Some(State::Break(None)) | None => State::Focus(Some(self.focus_duration)),
