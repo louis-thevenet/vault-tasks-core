@@ -10,15 +10,7 @@ use std::{
 };
 use tracing::{debug, info};
 
-use crate::TasksConfig;
-
-const STATE_TO_DO_EMOJI: &str = "❌";
-const STATE_DONE_EMOJI: &str = "✅";
-const STATE_INCOMPLETE_EMOJI: &str = "⏳";
-const STATE_CANCELED_EMOJI: &str = "❌";
-const DUE_DATE_EMOJI: &str = "📅";
-pub const PRIORITY_EMOJI: &str = "❗";
-pub const TODAY_FLAG_EMOJI: &str = "☀️";
+use crate::{PrettySymbolsConfig, TasksConfig};
 
 /// A task's state
 /// Ordering is `Todo < Done`
@@ -29,14 +21,20 @@ pub enum State {
     Incomplete,
     Canceled,
 }
+impl State {
+    fn display(&self, state_symbols: PrettySymbolsConfig) -> String {
+        match self {
+            Self::Done => state_symbols.task_done,
+            Self::ToDo => state_symbols.task_todo,
+            Self::Incomplete => state_symbols.task_incomplete,
+            Self::Canceled => state_symbols.task_canceled,
+        }
+    }
+}
 impl Display for State {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Done => write!(f, "{STATE_DONE_EMOJI}")?,
-            Self::ToDo => write!(f, "{STATE_TO_DO_EMOJI}")?,
-            Self::Incomplete => write!(f, "{STATE_INCOMPLETE_EMOJI}")?,
-            Self::Canceled => write!(f, "{STATE_CANCELED_EMOJI}")?,
-        }
+        let default_symbols = PrettySymbolsConfig::default();
+        write!(f, "{}", self.display(default_symbols))?;
         Ok(())
     }
 }
@@ -59,12 +57,12 @@ impl Display for DueDate {
 
 impl DueDate {
     #[must_use]
-    pub fn to_display_format(&self, not_american_format: bool) -> String {
+    pub fn to_display_format(&self, due_date_symbol: String, not_american_format: bool) -> String {
         if matches!(self, Self::NoDate) {
             String::new()
         } else {
             format!(
-                "{DUE_DATE_EMOJI} {}",
+                "{due_date_symbol} {}",
                 self.to_string_format(not_american_format)
             )
         }
@@ -167,13 +165,14 @@ impl Default for Task {
 
 impl fmt::Display for Task {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let default_symbols = PrettySymbolsConfig::default();
         let state = self.state.to_string();
         let title = format!("{state} {}", self.name);
         writeln!(f, "{title}")?;
 
         let mut data_line = String::new();
         let is_today = if self.is_today {
-            format!("{TODAY_FLAG_EMOJI} ")
+            format!("{} ", default_symbols.today_tag)
         } else {
             String::new()
         };
@@ -182,12 +181,13 @@ impl fmt::Display for Task {
 
         if !due_date_str.is_empty() {
             data_line.push_str(&format!(
-                "{DUE_DATE_EMOJI} {due_date_str} ({})",
+                "{} {due_date_str} ({})",
+                default_symbols.due_date,
                 self.due_date.get_relative_str().unwrap_or_default()
             ));
         }
         if self.priority > 0 {
-            data_line.push_str(&format!("{}{} ", PRIORITY_EMOJI, self.priority));
+            data_line.push_str(&format!("{}{} ", default_symbols.priority, self.priority));
         }
         if !data_line.is_empty() {
             writeln!(f, "{data_line}")?;
@@ -309,11 +309,6 @@ mod tests_tasks {
     fn test_fix_attributes() {
         let config = TasksConfig {
             use_american_format: true,
-            task_state_markers: crate::TaskMarkerConfig {
-                done: 'x',
-                todo: ' ',
-                ..Default::default()
-            },
             ..Default::default()
         };
         let task = Task {
@@ -333,11 +328,6 @@ mod tests_tasks {
     #[test]
     fn test_fix_attributes_with_no_date() {
         let config = TasksConfig {
-            task_state_markers: crate::TaskMarkerConfig {
-                done: 'x',
-                todo: ' ',
-                ..Default::default()
-            },
             ..Default::default()
         };
         let task = Task {
@@ -357,11 +347,6 @@ mod tests_tasks {
     #[test]
     fn test_fix_attributes_with_today_tag() {
         let config = TasksConfig {
-            task_state_markers: crate::TaskMarkerConfig {
-                done: 'x',
-                todo: ' ',
-                ..Default::default()
-            },
             ..Default::default()
         };
         let task = Task {

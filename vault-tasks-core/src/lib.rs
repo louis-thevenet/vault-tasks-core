@@ -35,6 +35,29 @@ impl Default for TaskMarkerConfig {
     }
 }
 
+#[derive(Clone, Debug, Deserialize)]
+pub struct PrettySymbolsConfig {
+    pub task_done: String,
+    pub task_todo: String,
+    pub task_incomplete: String,
+    pub task_canceled: String,
+    pub due_date: String,
+    pub priority: String,
+    pub today_tag: String,
+}
+impl Default for PrettySymbolsConfig {
+    fn default() -> Self {
+        Self {
+            task_done: String::from("✅"),
+            task_todo: String::from("❌"),
+            task_incomplete: String::from("⏳"),
+            task_canceled: String::from("🚫"),
+            due_date: String::from("📅"),
+            priority: String::from("❗"),
+            today_tag: String::from("☀️"),
+        }
+    }
+}
 #[derive(Clone, Debug, Deserialize, Default)]
 pub struct TasksConfig {
     #[serde(default)]
@@ -57,6 +80,8 @@ pub struct TasksConfig {
     pub filter_default_search_string: String,
     #[serde(default)]
     pub task_state_markers: TaskMarkerConfig,
+    #[serde(default)]
+    pub pretty_symbols_config: PrettySymbolsConfig,
 }
 
 pub struct TaskManager {
