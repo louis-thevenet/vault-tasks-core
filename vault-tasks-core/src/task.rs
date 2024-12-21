@@ -22,7 +22,7 @@ pub enum State {
     Canceled,
 }
 impl State {
-    fn display(&self, state_symbols: PrettySymbolsConfig) -> String {
+    pub fn display(&self, state_symbols: PrettySymbolsConfig) -> String {
         match self {
             Self::Done => state_symbols.task_done,
             Self::ToDo => state_symbols.task_todo,
