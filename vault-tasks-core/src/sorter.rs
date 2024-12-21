@@ -162,4 +162,31 @@ mod tests {
                 assert_debug_snapshot!(tasks);
         });
     }
+    #[test]
+    fn task_sort_states() {
+        let mut source = ["- [ ] test", "- [x] test", "- [/] test", "- [-] test"];
+        let config = TasksConfig {
+            use_american_format: true,
+            ..Default::default()
+        };
+        let mut tasks: Vec<Task> = source
+            .iter_mut()
+            .map(|input| parse_task(input, String::new(), &config).unwrap())
+            .collect();
+
+        let sorting_mode = SortingMode::ByDueDate;
+        SortingMode::sort(&mut tasks, sorting_mode);
+
+        let tasks = tasks
+            .iter()
+            .map(|task| task.get_fixed_attributes(&config, 2))
+            .collect::<Vec<String>>();
+
+        with_settings!({
+            info=>&source,
+            description => "", // the template source code
+        }, {
+                assert_debug_snapshot!(tasks);
+        });
+    }
 }

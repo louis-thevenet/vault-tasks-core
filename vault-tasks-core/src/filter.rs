@@ -37,10 +37,18 @@ pub fn parse_search_input(input: &str, config: &TasksConfig) -> Filter {
 
 fn filter_task(task: &Task, filter: &Filter) -> bool {
     let state_match = filter.state.is_none()
-        || filter
-            .state
-            .clone()
-            .is_some_and(|state| state == task.state);
+        || filter.state.clone().is_some_and(|state| {
+            // This is not really satisfying as you can't
+            // match only incomplete tasks for example
+            // I should add a config option for it
+            matches!(
+                (state, &task.state),
+                (
+                    State::ToDo | State::Incomplete,
+                    State::ToDo | State::Incomplete
+                ) | (State::Done | State::Canceled, State::Done | State::Canceled)
+            )
+        });
 
     let name_match = if filter.task.name.is_empty() {
         true

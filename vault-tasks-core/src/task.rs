@@ -14,13 +14,37 @@ use crate::{PrettySymbolsConfig, TasksConfig};
 
 /// A task's state
 /// Ordering is `Todo < Done`
-#[derive(Debug, Hash, Eq, PartialEq, Clone, PartialOrd, Ord)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub enum State {
     ToDo,
     Done,
     Incomplete,
     Canceled,
 }
+
+impl Ord for State {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match (self, other) {
+            (State::ToDo, State::ToDo)
+            | (State::Done, State::Done)
+            | (State::Canceled, State::Canceled)
+            | (State::Incomplete, State::Incomplete) => Ordering::Equal,
+            (State::Canceled | State::Done, State::ToDo)
+            | (State::ToDo | State::Done | State::Canceled, State::Incomplete)
+            | (State::Done, State::Canceled) => Ordering::Greater,
+            (State::ToDo, State::Done | State::Canceled)
+            | (State::Incomplete, State::ToDo | State::Done | State::Canceled)
+            | (State::Canceled, State::Done) => Ordering::Less,
+        }
+    }
+}
+
+impl PartialOrd for State {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
 impl State {
     pub fn display(&self, state_symbols: PrettySymbolsConfig) -> String {
         match self {
