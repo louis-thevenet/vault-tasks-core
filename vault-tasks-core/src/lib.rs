@@ -81,7 +81,7 @@ pub struct TasksConfig {
     #[serde(default)]
     pub task_state_markers: TaskMarkerConfig,
     #[serde(default)]
-    pub pretty_symbols_config: PrettySymbolsConfig,
+    pub pretty_symbols: PrettySymbolsConfig,
 }
 
 pub struct TaskManager {
