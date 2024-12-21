@@ -100,7 +100,11 @@ mod tests {
         ];
         let config = TasksConfig {
             use_american_format: true,
-            task_state_marker: 'x',
+            task_state_markers: crate::TaskMarkerConfig {
+                done: 'x',
+                todo: ' ',
+                ..Default::default()
+            },
             ..Default::default()
         };
         let mut tasks: Vec<Task> = source
@@ -141,7 +145,11 @@ mod tests {
         ];
         let config = TasksConfig {
             use_american_format: true,
-            task_state_marker: 'x',
+            task_state_markers: crate::TaskMarkerConfig {
+                done: 'x',
+                todo: ' ',
+                ..Default::default()
+            },
             ..Default::default()
         };
         let mut tasks: Vec<Task> = source

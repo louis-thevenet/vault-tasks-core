@@ -14,6 +14,8 @@ use crate::TasksConfig;
 
 const STATE_TO_DO_EMOJI: &str = "❌";
 const STATE_DONE_EMOJI: &str = "✅";
+const STATE_INCOMPLETE_EMOJI: &str = "⏳";
+const STATE_CANCELED_EMOJI: &str = "❌";
 const DUE_DATE_EMOJI: &str = "📅";
 pub const PRIORITY_EMOJI: &str = "❗";
 pub const TODAY_FLAG_EMOJI: &str = "☀️";
@@ -24,12 +26,16 @@ pub const TODAY_FLAG_EMOJI: &str = "☀️";
 pub enum State {
     ToDo,
     Done,
+    Incomplete,
+    Canceled,
 }
 impl Display for State {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Done => write!(f, "{STATE_DONE_EMOJI}")?,
             Self::ToDo => write!(f, "{STATE_TO_DO_EMOJI}")?,
+            Self::Incomplete => write!(f, "{STATE_INCOMPLETE_EMOJI}")?,
+            Self::Canceled => write!(f, "{STATE_CANCELED_EMOJI}")?,
         }
         Ok(())
     }
@@ -215,8 +221,10 @@ impl Task {
         let indent = " ".repeat(indent_length);
 
         let state_str = match self.state {
-            State::Done => config.task_state_marker,
-            State::ToDo => ' ',
+            State::Done => config.task_state_markers.done,
+            State::ToDo => config.task_state_markers.todo,
+            State::Incomplete => config.task_state_markers.incomplete,
+            State::Canceled => config.task_state_markers.canceled,
         };
 
         let priority = if self.priority > 0 {
@@ -301,6 +309,11 @@ mod tests_tasks {
     fn test_fix_attributes() {
         let config = TasksConfig {
             use_american_format: true,
+            task_state_markers: crate::TaskMarkerConfig {
+                done: 'x',
+                todo: ' ',
+                ..Default::default()
+            },
             ..Default::default()
         };
         let task = Task {
@@ -320,7 +333,11 @@ mod tests_tasks {
     #[test]
     fn test_fix_attributes_with_no_date() {
         let config = TasksConfig {
-            task_state_marker: 'x',
+            task_state_markers: crate::TaskMarkerConfig {
+                done: 'x',
+                todo: ' ',
+                ..Default::default()
+            },
             ..Default::default()
         };
         let task = Task {
@@ -340,7 +357,11 @@ mod tests_tasks {
     #[test]
     fn test_fix_attributes_with_today_tag() {
         let config = TasksConfig {
-            task_state_marker: 'x',
+            task_state_markers: crate::TaskMarkerConfig {
+                done: 'x',
+                todo: ' ',
+                ..Default::default()
+            },
             ..Default::default()
         };
         let task = Task {

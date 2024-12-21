@@ -15,6 +15,26 @@ pub mod task;
 pub mod vault_data;
 mod vault_parser;
 
+#[derive(Clone, Debug, Deserialize)]
+pub struct TaskMarkerConfig {
+    pub done: char,
+    pub todo: char,
+    pub incomplete: char,
+    pub canceled: char,
+}
+
+// Mostly for tests
+impl Default for TaskMarkerConfig {
+    fn default() -> Self {
+        Self {
+            done: 'x',
+            todo: ' ',
+            incomplete: '/',
+            canceled: '-',
+        }
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Default)]
 pub struct TasksConfig {
     #[serde(default)]
@@ -36,7 +56,7 @@ pub struct TasksConfig {
     #[serde(default)]
     pub filter_default_search_string: String,
     #[serde(default)]
-    pub task_state_marker: char,
+    pub task_state_markers: TaskMarkerConfig,
 }
 
 pub struct TaskManager {

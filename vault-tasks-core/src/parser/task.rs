@@ -32,7 +32,7 @@ fn parse_token(input: &mut &str, config: &TasksConfig) -> PResult<Token> {
         |input: &mut &str| parse_naive_date(input, config.use_american_format),
         parse_naive_time,
         parse_tag,
-        parse_task_state,
+        |input: &mut &str| parse_task_state(input, &config.task_state_markers),
         parse_priority,
         parse_today,
         |input: &mut &str| {
@@ -55,7 +55,7 @@ fn parse_token(input: &mut &str, config: &TasksConfig) -> PResult<Token> {
 /// Will return an error if the task can't be parsed.
 #[allow(clippy::module_name_repetitions)]
 pub fn parse_task(input: &mut &str, filename: String, config: &TasksConfig) -> PResult<Task> {
-    let task_state = match parse_task_state(input)? {
+    let task_state = match parse_task_state(input, &config.task_state_markers)? {
         Token::State(state) => Ok(state),
         _ => fail(input),
     }?;

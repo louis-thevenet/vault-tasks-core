@@ -4,15 +4,25 @@ use winnow::{
     PResult, Parser,
 };
 
-use crate::task::State;
+use crate::{task::State, TaskMarkerConfig};
 
 use super::token::Token;
 
 /// Parses a `TaskState` from an input string.
-pub fn parse_task_state(input: &mut &str) -> PResult<Token> {
+pub fn parse_task_state(input: &mut &str, task_marker_config: &TaskMarkerConfig) -> PResult<Token> {
     match preceded("- ", delimited("[", any, "]")).parse_next(input) {
-        Ok(' ') => Ok(Token::State(State::ToDo)),
-        Ok(_) => Ok(Token::State(State::Done)),
+        Ok(c) => {
+            if c == task_marker_config.todo {
+                Ok(Token::State(State::ToDo))
+            } else if c == task_marker_config.incomplete {
+                Ok(Token::State(State::Incomplete))
+            } else if c == task_marker_config.canceled {
+                Ok(Token::State(State::Canceled))
+            } else {
+                Ok(Token::State(State::Done))
+            }
+        }
+
         Err(error) => Err(error),
     }
 
@@ -28,29 +38,49 @@ mod test {
     use crate::{
         parser::task::{parser_state::parse_task_state, token::Token},
         task::State,
+        TaskMarkerConfig,
     };
+    fn config() -> TaskMarkerConfig {
+        TaskMarkerConfig {
+            done: 'x',
+            todo: ' ',
+            incomplete: '/',
+            canceled: '-',
+        }
+    }
 
     #[test]
     fn test_parse_task_state_todo() {
         let mut input = "- [ ]";
         let expected = Ok(Token::State(State::ToDo));
-        assert_eq!(parse_task_state(&mut input), expected);
+        let config = &config();
+        assert_eq!(parse_task_state(&mut input, config), expected);
     }
     #[test]
     fn test_parse_task_state_done() {
         let mut input = "- [X]";
         let expected = Ok(Token::State(State::Done));
-        assert_eq!(parse_task_state(&mut input), expected);
+        let config = &config();
+        assert_eq!(parse_task_state(&mut input, config), expected);
     }
     #[test]
     fn test_parse_task_state_done_alt() {
         let mut input = "- [o]";
         let expected = Ok(Token::State(State::Done));
-        assert_eq!(parse_task_state(&mut input), expected);
+        let config = &config();
+        assert_eq!(parse_task_state(&mut input, config), expected);
+    }
+    #[test]
+    fn test_parse_task_state_canceled() {
+        let mut input = "- [-]";
+        let expected = Ok(Token::State(State::Canceled));
+        let config = &config();
+        assert_eq!(parse_task_state(&mut input, config), expected);
     }
     #[test]
     fn test_parse_task_state_fail() {
         let mut input = "- o]";
-        assert!(parse_task_state(&mut input).is_err());
+        let config = &config();
+        assert!(parse_task_state(&mut input, config).is_err());
     }
 }
